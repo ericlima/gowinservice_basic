@@ -5,10 +5,12 @@ import (
 	"time"
 
 	"github.com/kardianos/service"
+
+	"golang.org/x/sys/windows/svc/eventlog"
 )
 
 var logger service.Logger
-
+var eventLog *eventlog.Log
 type program struct{}
 
 func (p *program) Start(s service.Service) error {
@@ -28,6 +30,8 @@ func (p *program) run() {
 	for {
 		// Coloque a lógica do seu serviço aqui.
 		logger.Info("Serviço em execução...")
+		eventLog.Info(1, "Mensagem de exemplo")
+
 		time.Sleep(5 * time.Second)
 	}
 }
@@ -38,6 +42,12 @@ func main() {
 		DisplayName: "Meu Serviço do Windows",
 		Description: "Um exemplo de serviço do Windows em Go",
 	}
+
+	eventLog, err := eventlog.Open(svcConfig.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer eventLog.Close()
 
 	prg := &program{}
 
